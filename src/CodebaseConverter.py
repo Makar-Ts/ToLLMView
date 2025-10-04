@@ -94,7 +94,7 @@ class CodebaseConverter:
         print(f"{Fore.LIGHTYELLOW_EX}✓ After extension filtering: {Fore.LIGHTMAGENTA_EX}{len(filtered_files)} {Fore.LIGHTYELLOW_EX}files remaining{Style.RESET_ALL}")
         return filtered_files
     
-    def filter_files_by_regex(self, files: List[str], regex: re.Pattern) -> List[str]:
+    def filter_files_by_regex(self, files: List[str], bregex: Optional[re.Pattern], wregex: Optional[re.Pattern]) -> List[str]:
         """
         Filter filenames by Regex.
         
@@ -108,7 +108,8 @@ class CodebaseConverter:
         
         filtered_files = []
         for file_path in files:
-            if not regex.match(file_path):
+            if 	(bregex is None or not bregex.match(file_path)) and \
+                (wregex is None or wregex.match(file_path)):
                 filtered_files.append(file_path)
         
         print(f"{Fore.LIGHTYELLOW_EX}✓ After Regex filtering: {Fore.LIGHTCYAN_EX}{len(filtered_files)} {Fore.LIGHTYELLOW_EX}files remaining{Style.RESET_ALL}")
@@ -323,13 +324,14 @@ STATISTICS:
         
         return "\n".join(footer_parts)
 
-    def convert(self, extensions: Optional[Set[str]] = None, regex: Optional[re.Pattern] = None) -> None:
+    def convert(self, extensions: Optional[Set[str]] = None, bregex: Optional[re.Pattern] = None, wregex: Optional[re.Pattern] = None) -> None:
         """
         Perform full codebase conversion.
         
         Args:
             extensions: Set of extensions to filter by (e.g., {'.py', '.js'})
-            regex: Regex pattern for filtering
+            bregex: Regex pattern for blacklist filtering
+            wregex: Regex pattern for whitelist filtering
         """
         try:
             print(f"🚀 Starting codebase converter...")
@@ -341,8 +343,8 @@ STATISTICS:
             if extensions:
                 files = self.filter_files_by_extensions(files, extensions)
             
-            if regex:
-                files = self.filter_files_by_regex(files, regex)
+            if bregex is not None or wregex is not None:
+                files = self.filter_files_by_regex(files, bregex, wregex)
             
             if not files:
                 eprint("⚠️  No files to process after filtering")

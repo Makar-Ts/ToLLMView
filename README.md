@@ -47,8 +47,15 @@ to-llm-view -r
 # Exclude files using regex
 to-llm-view -rb "(^\.)|(^tsconfig)"
 
+# Include files using regex
+to-llm-view -rw ".*\.component\..*"
+
 # Combine options
-to-llm-view -o export.txt -w py,md -r
+to-llm-view -r -o export.txt -w py,md
+to-llm-view -r -rb "^public/"
+to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*"
+to-llm-view -r -rw ".*\.component\..*" -w ts,js,html
+to-llm-view -r -rw "^src/app/@standalone"
 ```
 
 ## Command Line Options
@@ -59,6 +66,7 @@ to-llm-view -o export.txt -w py,md -r
 | `-r, --root` | Save file in parent directory instead of current folder |
 | `-w, --whitelist` | Include only specified file extensions (comma-separated) |
 | `-rb, --regex-blacklist` | Exclude files matching regex pattern |
+| `-rw, --regex-whitelist` | Include files matching regex pattern |
 
 ## Output Format
 

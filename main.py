@@ -33,12 +33,17 @@ def main():
     
     parser.add_argument(
         '-w', '--whitelist',
-        help='File extensions to include (comma separated, e.g.: py,js,html)'
+        help='File extensions to include (comma separated, e.g.: py,js,html). I recommend using --regex-whitelsit instead.'
     )
     
     parser.add_argument(
         '-rb', '--regex-blacklist',
-        help='Regex for filename filtering'
+        help='Regex for blacklist filename filtering'
+    )
+    
+    parser.add_argument(
+        '-rw', '--regex-whitelist',
+        help='Regex for whitelist filename filtering'
     )
     
     args = parser.parse_args()
@@ -50,10 +55,16 @@ def main():
         print(f"🔍 {Fore.GREEN}Filtering by extensions: {Fore.LIGHTMAGENTA_EX}{', '.join(sorted(extensions))}{Style.RESET_ALL}")
     
     
-    regex = re.compile(args.regex_blacklist, re.IGNORECASE) if args.regex_blacklist else None
+    bregex = re.compile(args.regex_blacklist, re.IGNORECASE) if args.regex_blacklist else None
     
-    if regex:
-        print(f"🔍 {Fore.GREEN}Filtering by Regex: {Fore.LIGHTCYAN_EX}{args.regex_blacklist}{Style.RESET_ALL}")
+    if bregex:
+        print(f"🔍 {Fore.GREEN}Filtering by blacklist Regex: {Fore.LIGHTCYAN_EX}{args.regex_blacklist}{Style.RESET_ALL}")
+        
+    
+    wregex = re.compile(args.regex_whitelist, re.IGNORECASE) if args.regex_whitelist else None
+    
+    if wregex:
+        print(f"🔍 {Fore.GREEN}Filtering by whitelist Regex: {Fore.LIGHTCYAN_EX}{args.regex_whitelist}{Style.RESET_ALL}")
     
     # Check if we're in a Git repository
     if not os.path.exists('.git'):
@@ -71,7 +82,7 @@ def main():
     
     # Create and run converter
     converter = CodebaseConverter(output_name, root_path)
-    converter.convert(extensions, regex)
+    converter.convert(extensions, bregex, wregex)
     
     return 0
 
