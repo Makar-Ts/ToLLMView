@@ -14,16 +14,15 @@ from info import VERSION
 
 
 class CodebaseConverter:
-    """Основной класс для конвертации кодбазы в текстовый формат."""
+    """Main class for converting codebase to text format."""
     
     def __init__(self, output_file: str = "codebase_export.txt", output_dir: str = None):
         """
-        Инициализация конвертера.
+        Initialize converter.
         
         Args:
-            output_file: Имя файла для сохранения результата
-            output_dir: Путь до директории в которую будет сохранен файл
-            regex_blacklist: Regex для фильтрации имен файлов
+            output_file: Output filename
+            output_dir: Directory path where file will be saved
         """
         
         if output_dir is not None:
@@ -37,17 +36,17 @@ class CodebaseConverter:
         
     def get_git_files(self) -> List[str]:
         """
-        Получить список файлов из Git репозитория.
+        Get file list from Git repository.
         
         Returns:
-            Список путей к файлам в репозитории
+            List of file paths in repository
             
         Raises:
-            subprocess.CalledProcessError: Если команда git завершилась с ошибкой
-            FileNotFoundError: Если git не установлен
+            subprocess.CalledProcessError: If git command fails
+            FileNotFoundError: If git is not installed
         """
         try:
-            # Выполняем команду git ls-tree для получения списка файлов
+            # Execute git ls-tree to get file list
             result = subprocess.run(
                 ["git", "ls-tree", "-r", "HEAD", "--name-only"],
                 capture_output=True,
@@ -55,32 +54,32 @@ class CodebaseConverter:
                 check=True
             )
             
-            # Разделяем вывод на строки и убираем пустые строки
+            # Split output by lines and remove empty lines
             files = [line.strip() for line in result.stdout.split('\n') if line.strip()]
             
-            print(f"✓ Найдено {len(files)} файлов в Git репозитории")
+            print(f"✓ Found {len(files)} files in Git repository")
             return files
             
         except subprocess.CalledProcessError as e:
-            error_msg = f"Ошибка выполнения команды git: {e.stderr}"
+            error_msg = f"Git command error: {e.stderr}"
             print(f"✗ {error_msg}")
             raise
             
         except FileNotFoundError:
-            error_msg = "Git не установлен или не найден в PATH"
+            error_msg = "Git is not installed or not found in PATH"
             print(f"✗ {error_msg}")
             raise
 
     def filter_files_by_extensions(self, files: List[str], extensions: Set[str]) -> List[str]:
         """
-        Фильтрация файлов по расширениям.
+        Filter files by extensions.
         
         Args:
-            files: Список путей к файлам
-            extensions: Множество расширений для фильтрации (например, {'.py', '.js'})
+            files: List of file paths
+            extensions: Set of extensions to filter by (e.g., {'.py', '.js'})
             
         Returns:
-            Отфильтрованный список файлов
+            Filtered file list
         """
         if not extensions:
             return files
@@ -91,19 +90,19 @@ class CodebaseConverter:
             if file_ext in extensions:
                 filtered_files.append(file_path)
                 
-        print(f"✓ После фильтрации по расширениям осталось {len(filtered_files)} файлов")
+        print(f"✓ After extension filtering: {len(filtered_files)} files remaining")
         return filtered_files
     
     def filter_files_by_regex(self, files: List[str], regex: re.Pattern) -> List[str]:
         """
-        Фильтрация имен файлов по Regex.
+        Filter filenames by Regex.
         
         Args:
-            files: Список путей к файлам
-            regex: Regex паттерн
+            files: List of file paths
+            regex: Regex pattern
             
         Returns:
-            Отфильтрованный список файлов
+            Filtered file list
         """
         
         filtered_files = []
@@ -111,43 +110,43 @@ class CodebaseConverter:
             if not regex.match(file_path):
                 filtered_files.append(file_path)
         
-        print(f"✓ После фильтрации по Regex осталось {len(filtered_files)} файлов")
+        print(f"✓ After Regex filtering: {len(filtered_files)} files remaining")
         return filtered_files
 
     def create_file_tree(self, files: List[str]) -> str:
         """
-        Создать дерево файлов в читаемом формате.
+        Create file tree in readable format.
         
         Args:
-            files: Список путей к файлам
+            files: List of file paths
             
         Returns:
-            Строковое представление дерева файлов
+            String representation of file tree
         """
-        print("📁 Создание дерева файлов...")
+        print("📁 Creating file tree...")
         
-        tree_lines = ["СТРУКТУРА ПРОЕКТА:", "=" * 50, ""]
+        tree_lines = ["PROJECT STRUCTURE:", "=" * 50, ""]
         
-        # Сортируем файлы для красивого отображения
+        # Sort files for nice display
         sorted_files = sorted(files)
         
-        # Группируем файлы по директориям
+        # Group files by directories
         dirs = {}
         for file_path in sorted_files:
             path_parts = Path(file_path).parts
             
-            # Обрабатываем каждый уровень вложенности
+            # Process each nesting level
             current_dict = dirs
-            for part in path_parts[:-1]:  # Все части кроме имени файла
+            for part in path_parts[:-1]:  # All parts except filename
                 if part not in current_dict:
                     current_dict[part] = {}
                 current_dict = current_dict[part]
             
-            # Добавляем файл
+            # Add file
             filename = path_parts[-1]
             current_dict[filename] = None
         
-        # Рекурсивно строим дерево
+        # Build tree recursively
         def build_tree(d: dict, prefix: str = "") -> List[str]:
             lines = []
             items = sorted(d.items())
@@ -157,7 +156,7 @@ class CodebaseConverter:
                 current_prefix = "└── " if is_last else "├── "
                 lines.append(f"{prefix}{current_prefix}{name}")
                 
-                if subdirs is not None:  # Это директория
+                if subdirs is not None:  # This is a directory
                     next_prefix = prefix + ("    " if is_last else "│   ")
                     lines.extend(build_tree(subdirs, next_prefix))
                     
@@ -170,21 +169,21 @@ class CodebaseConverter:
 
     def read_file_safely(self, file_path: str) -> Optional[str]:
         """
-        Безопасное чтение файла с обработкой различных типов ошибок.
+        Safely read file with error handling.
         
         Args:
-            file_path: Путь к файлу
+            file_path: File path
             
         Returns:
-            Содержимое файла или None в случае ошибки
+            File content or None in case of error
         """
         try:
-            # Проверяем существование файла
+            # Check if file exists
             if not os.path.exists(file_path):
-                self.errors.append(f"Файл не существует: {file_path}")
+                self.errors.append(f"File doesn't exist: {file_path}")
                 return None
             
-            # Пытаемся прочитать как текстовый файл с разными кодировками
+            # Try to read as text file with different encodings
             encodings = ['utf-8', 'cp1251', 'latin1', 'ascii']
             
             for encoding in encodings:
@@ -192,10 +191,10 @@ class CodebaseConverter:
                     with open(file_path, 'r', encoding=encoding, errors='strict') as f:
                         content = f.read()
                         
-                    # Проверяем, что файл не слишком большой (> 1MB)
+                    # Check if file is not too large (> 1MB)
                     if len(content) > 1024 * 1024:
-                        self.errors.append(f"Файл слишком большой (>1MB): {file_path}")
-                        return f"[ФАЙЛ СЛИШКОМ БОЛЬШОЙ - СОДЕРЖИМОЕ ПРОПУЩЕНО]\nРазмер: {len(content)} символов"
+                        self.errors.append(f"File too large (>1MB): {file_path}")
+                        return f"[FILE TOO LARGE - CONTENT SKIPPED]\nSize: {len(content)} characters"
                     
                     return content
                     
@@ -204,37 +203,37 @@ class CodebaseConverter:
                 except UnicodeError:
                     continue
             
-            # Если не удалось прочитать ни с одной кодировкой - вероятно бинарный файл
-            self.errors.append(f"Бинарный файл или неподдерживаемая кодировка: {file_path}")
-            return "[БИНАРНЫЙ ФАЙЛ ИЛИ НЕПОДДЕРЖИВАЕМАЯ КОДИРОВКА]"
+            # If couldn't read with any encoding - probably binary file
+            self.errors.append(f"Binary file or unsupported encoding: {file_path}")
+            return "[BINARY FILE OR UNSUPPORTED ENCODING]"
             
         except PermissionError:
-            self.errors.append(f"Нет прав доступа к файлу: {file_path}")
-            return "[НЕТ ПРАВ ДОСТУПА К ФАЙЛУ]"
+            self.errors.append(f"No access rights to file: {file_path}")
+            return "[NO FILE ACCESS RIGHTS]"
             
         except Exception as e:
-            self.errors.append(f"Неожиданная ошибка при чтении {file_path}: {str(e)}")
-            return f"[ОШИБКА ЧТЕНИЯ ФАЙЛА: {str(e)}]"
+            self.errors.append(f"Unexpected error reading {file_path}: {str(e)}")
+            return f"[FILE READING ERROR: {str(e)}]"
 
     def process_files(self, files: List[str]) -> str:
         """
-        Обработать список файлов и создать единый текстовый документ.
+        Process file list and create unified text document.
         
         Args:
-            files: Список путей к файлам
+            files: List of file paths
             
         Returns:
-            Содержимое всех файлов в едином формате
+            Content of all files in unified format
         """
-        print(f"📄 Обработка {len(files)} файлов...")
+        print(f"📄 Processing {len(files)} files...")
         
         content_parts = []
         separator = "=" * 80
         
         for i, file_path in enumerate(files, 1):
-            print(f"  Обрабатываю ({i}/{len(files)}): {file_path}")
+            print(f"  Processing ({i}/{len(files)}): {file_path}")
             
-            # Читаем содержимое файла
+            # Read file content
             file_content = self.read_file_safely(file_path)
             
             if file_content is None:
@@ -242,12 +241,12 @@ class CodebaseConverter:
                 
                 continue
             
-            # Формируем блок с информацией о файле
+            # Create file info block
             file_block = [
                 separator,
-                f"ФАЙЛ: {file_path}",
-                f"РАЗМЕР: {len(file_content)} символов",
-                f"ОБРАБОТАН: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                f"FILE: {file_path}",
+                f"SIZE: {len(file_content)} characters",
+                f"PROCESSED: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                 separator,
                 "",
                 file_content,
@@ -262,23 +261,23 @@ class CodebaseConverter:
 
     def create_header(self) -> str:
         """
-        Создать заголовок документа с метаинформацией.
+        Create document header with meta information.
         
         Returns:
-            Заголовок документа
+            Document header
         """
         current_dir = os.getcwd()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
         header = f"""
-Директория: {current_dir}
-Дата создания: {timestamp}
-Создано программой: To LLM View {VERSION}
+Directory: {current_dir}
+Creation date: {timestamp}
+Created by: To LLM View {VERSION}
 
-СТАТИСТИКА:
-- Обработано файлов: {self.processed_files}
-- Пропущено файлов: {self.skipped_files}
-- Ошибок обработки: {len(self.errors)}
+STATISTICS:
+- Processed files: {self.processed_files}
+- Skipped files: {self.skipped_files}
+- Processing errors: {len(self.errors)}
 
 {'=' * 80}
 
@@ -287,25 +286,25 @@ class CodebaseConverter:
 
     def create_footer(self) -> str:
         """
-        Создать подвал документа с информацией об ошибках.
+        Create document footer with error information.
         
         Returns:
-            Подвал документа
+            Document footer
         """
         footer_parts = [
             "=" * 80,
-            "ЗАВЕРШЕНИЕ ОБРАБОТКИ",
+            "PROCESSING COMPLETE",
             "=" * 80,
             "",
-            f"Всего обработано файлов: {self.processed_files}",
-            f"Пропущено файлов: {self.skipped_files}",
-            f"Общее количество ошибок: {len(self.errors)}",
+            f"Total processed files: {self.processed_files}",
+            f"Skipped files: {self.skipped_files}",
+            f"Total errors: {len(self.errors)}",
             ""
         ]
         
         if self.errors:
             footer_parts.extend([
-                "ДЕТАЛИ ОШИБОК:",
+                "ERROR DETAILS:",
                 "-" * 40,
                 ""
             ])
@@ -316,7 +315,7 @@ class CodebaseConverter:
             footer_parts.append("")
         
         footer_parts.extend([
-            f"Экспорт завершен: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"Export completed: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             "=" * 80
         ])
         
@@ -324,19 +323,19 @@ class CodebaseConverter:
 
     def convert(self, extensions: Optional[Set[str]] = None, regex: Optional[re.Pattern] = None) -> None:
         """
-        Выполнить полную конвертацию кодбазы.
+        Perform full codebase conversion.
         
         Args:
-            extensions: Множество расширений для фильтрации (например, {'.py', '.js'})
-            regex: Regex паттерн для фильтрации
+            extensions: Set of extensions to filter by (e.g., {'.py', '.js'})
+            regex: Regex pattern for filtering
         """
         try:
-            print("🚀 Запуск конвертера кодбазы...")
+            print("🚀 Starting codebase converter...")
             
-            # Получаем список файлов из Git
+            # Get file list from Git
             files = self.get_git_files()
             
-            # Фильтруем
+            # Filter
             if extensions:
                 files = self.filter_files_by_extensions(files, extensions)
             
@@ -344,53 +343,53 @@ class CodebaseConverter:
                 files = self.filter_files_by_regex(files, regex)
             
             if not files:
-                print("⚠️  Нет файлов для обработки после фильтрации")
+                print("⚠️  No files to process after filtering")
                 return
             
-            # Создаем дерево файлов
+            # Create file tree
             file_tree = self.create_file_tree(files)
             
-            # Обрабатываем файлы
+            # Process files
             files_content = self.process_files(files)
             
-            # Собираем финальный документ
-            print(f"💾 Сохранение результата в файл: {self.output_file}")
+            # Build final document
+            print(f"💾 Saving result to file: {self.output_file}")
             
             with open(self.output_file, 'w', encoding='utf-8') as f:
-                # Записываем заголовок (после обработки, чтобы была статистика)
+                # Write header (after processing to include statistics)
                 f.write(self.create_header())
                 
-                # Записываем дерево файлов
+                # Write file tree
                 f.write(file_tree)
                 
-                # Записываем содержимое файлов
+                # Write file contents
                 f.write(files_content)
                 
-                # Записываем подвал
+                # Write footer
                 f.write(self.create_footer())
             
-            print(f"✅ Конвертация завершена успешно!")
-            print(f"   📄 Обработано файлов: {self.processed_files}")
-            print(f"   ⚠️  Пропущено файлов: {self.skipped_files}")
-            print(f"   📁 Результат сохранен в: {self.output_file}")
+            print(f"✅ Conversion completed successfully!")
+            print(f"   📄 Processed files: {self.processed_files}")
+            print(f"   ⚠️  Skipped files: {self.skipped_files}")
+            print(f"   📁 Result saved to: {self.output_file}")
             
             if self.errors:
-                print(f"   ⚠️  Обнаружено ошибок: {len(self.errors)} (детали в файле)")
+                print(f"   ⚠️  Errors found: {len(self.errors)} (details in file)")
             
         except Exception as e:
-            print(f"💥 Критическая ошибка: {str(e)}")
+            print(f"💥 Critical error: {str(e)}")
             sys.exit(1)
 
 
 def parse_extensions(ext_string: str) -> Set[str]:
     """
-    Парсинг строки с расширениями файлов.
+    Parse file extensions string.
     
     Args:
-        ext_string: Строка с расширениями через запятую (например, "py,js,html")
+        ext_string: String with extensions separated by commas (e.g., "py,js,html")
         
     Returns:
-        Множество расширений с точками
+        Set of extensions with dots
     """
     if not ext_string:
         return set()
@@ -407,47 +406,52 @@ def parse_extensions(ext_string: str) -> Set[str]:
 
 
 def main():
-    """Главная функция программы."""
+    """Main program function."""
     parser = argparse.ArgumentParser(
-        description="Конвертер кодбазы в единый текстовый документ для работы с нейросетями",
-        epilog="Пример: python codebase_converter.py -o my_codebase.txt -w py,js,html"
+        description="Codebase converter to unified text document for working with neural networks",
+        epilog="Example: python codebase_converter.py -o my_codebase.txt -w py,js,html"
     )
     
     parser.add_argument(
         '-o', '--output',
         default='codebase_export.txt',
-        help='Имя выходного файла (по умолчанию: codebase_export.txt)'
+        help='Output filename (default: codebase_export.txt)'
     )
     
     parser.add_argument(
         '-r', '--root',
         action='store_true',
-        help='Создание выходного файла на одном уровне с текущей папкой, а не в ней'
+        help='Create output file at the same level as current folder, not inside it'
     )
     
     parser.add_argument(
         '-w', '--whitelist',
-        help='Расширения файлов для включения (через запятую, например: py,js,html)'
+        help='File extensions to include (comma separated, e.g.: py,js,html)'
     )
     
     parser.add_argument(
         '-rb', '--regex-blacklist',
-        default=r'.*',
-        help='Regex для фильтрации имен файлов'
+        help='Regex for filename filtering'
     )
     
     args = parser.parse_args()
     
-    # Парсим расширения
+    # Parse extensions
     extensions = parse_extensions(args.whitelist) if args.whitelist else None
     
     if extensions:
-        print(f"🔍 Фильтрация по расширениям: {', '.join(sorted(extensions))}")
+        print(f"🔍 Filtering by extensions: {', '.join(sorted(extensions))}")
     
-    # Проверяем, что мы находимся в Git репозитории
+    
+    regex = re.compile(args.regex_blacklist, re.IGNORECASE) if args.regex_blacklist else None
+    
+    if regex:
+        print(f"🔍 Filtering by Regex: {args.regex_blacklist}")
+    
+    # Check if we're in a Git repository
     if not os.path.exists('.git'):
-        print("❌ Ошибка: текущая директория не является Git репозиторием")
-        print("   Перейдите в корень Git репозитория и запустите программу снова")
+        print("❌ Error: current directory is not a Git repository")
+        print("   Navigate to Git repository root and run the program again")
         return 1
     
     output_name = args.output
@@ -458,9 +462,9 @@ def main():
         
         output_name = p[p.rfind(os.sep)+len(os.sep):]+"."+output_name
     
-    # Создаем и запускаем конвертер
+    # Create and run converter
     converter = CodebaseConverter(output_name, root_path)
-    converter.convert(extensions, re.compile(args.regex_blacklist, re.IGNORECASE))
+    converter.convert(extensions, regex)
     
     return 0
 
