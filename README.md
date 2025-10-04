@@ -93,7 +93,7 @@ ToLLMView/
 
 ## Development
 
-This is version 0.1.0. The project is actively maintained and welcomes contributions!
+This is version 0.1.2. The project is actively maintained and welcomes contributions!
 
 ### Running from Source
 ```bash

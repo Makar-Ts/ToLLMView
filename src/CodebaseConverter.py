@@ -11,7 +11,7 @@ import re
 from colorama import Fore, Back, Style
 
 from info import VERSION
-from src.utils import eprint
+from src.utils import eprint, filler
 
 
 class CodebaseConverter:
@@ -230,9 +230,10 @@ class CodebaseConverter:
         
         content_parts = []
         separator = "=" * 80
+        files_amount = len(files)
         
         for i, file_path in enumerate(files, 1):
-            print(f"  {Fore.LIGHTGREEN_EX}Processing ({i}/{len(files)}): {Fore.LIGHTBLUE_EX}{file_path}{Style.RESET_ALL}")
+            print(f"  {Fore.LIGHTGREEN_EX}Processing ({filler(str(i), len(str(files_amount)), '_')}/{files_amount}): {Fore.LIGHTBLUE_EX}{file_path}{Style.RESET_ALL}")
             
             # Read file content
             file_content = self.read_file_safely(file_path)
