@@ -45,7 +45,7 @@ to-llm-view -o my_project_export.txt
 to-llm-view -r
 
 # Exclude files using regex
-to-llm-view -rb ".*test.*|.*__pycache__.*"
+to-llm-view -rb "(^\.)|(^tsconfig)"
 
 # Combine options
 to-llm-view -o export.txt -w py,md -r
@@ -81,7 +81,10 @@ The generated file includes:
 
 ```
 ToLLMView/
-├── main.py          # Main converter logic
+├── main.py          # Runfile & Arguments process
+├── src/
+    ├── CodebaseConverter.py    # Converter Logic
+    ├── utils.py                # Utility functions
 ├── setup.py         # Package configuration
 ├── info.py          # Version information
 ├── README.md        # This file
@@ -96,10 +99,6 @@ This is version 0.1.0. The project is actively maintained and welcomes contribut
 ```bash
 python main.py [options]
 ```
-
-## License
-
-[Add your license here]
 
 ---
 
