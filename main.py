@@ -8,7 +8,7 @@ import re
 from colorama import Fore, Back, Style
 
 from src.CodebaseConverter import CodebaseConverter
-from src.utils import eprint, parse_extensions
+from src.utils import convert_filesize, eprint, parse_extensions
 
 
 
@@ -16,7 +16,7 @@ def main():
     """Main program function."""
     parser = argparse.ArgumentParser(
         description="Codebase converter to unified text document for working with neural networks",
-        epilog="Example: python codebase_converter.py -o my_codebase.txt -w py,js,html"
+        epilog='Example: to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*" -o output.txt -mf 4kb'
     )
     
     parser.add_argument(
@@ -31,10 +31,12 @@ def main():
         help='Create output file at the same level as current folder, not inside it'
     )
     
+    
     parser.add_argument(
         '-w', '--whitelist',
         help='File extensions to include (comma separated, e.g.: py,js,html). I recommend using --regex-whitelsit instead.'
     )
+    
     
     parser.add_argument(
         '-rb', '--regex-blacklist',
@@ -45,6 +47,13 @@ def main():
         '-rw', '--regex-whitelist',
         help='Regex for whitelist filename filtering'
     )
+    
+    
+    parser.add_argument(
+        '-mf', '--max-filesize',
+        help='Maximum filesize to include (float, e.g.: 1.1mb, 2kb, 1.444gb, etc.)'
+    )
+    
     
     args = parser.parse_args()
     
@@ -66,6 +75,10 @@ def main():
     if wregex:
         print(f"🔍 {Fore.GREEN}Filtering by whitelist Regex: {Fore.LIGHTCYAN_EX}{args.regex_whitelist}{Style.RESET_ALL}")
     
+    
+    max_filesize = convert_filesize(args.max_filesize) if args.max_filesize else 1024 ** 2
+    print(f"🔍 {Fore.GREEN}Maximum filesize set to: {Fore.LIGHTCYAN_EX}{max_filesize} Bytes{Style.RESET_ALL}")
+    
     # Check if we're in a Git repository
     if not os.path.exists('.git'):
         eprint("❌ Error: current directory is not a Git repository")
@@ -81,7 +94,7 @@ def main():
         output_name = p[p.rfind(os.sep)+len(os.sep):]+"."+output_name
     
     # Create and run converter
-    converter = CodebaseConverter(output_name, root_path)
+    converter = CodebaseConverter(output_name, root_path, max_filesize)
     converter.convert(extensions, bregex, wregex)
     
     return 0

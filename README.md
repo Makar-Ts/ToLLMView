@@ -50,12 +50,15 @@ to-llm-view -rb "(^\.)|(^tsconfig)"
 # Include files using regex
 to-llm-view -rw ".*\.component\..*"
 
+# Filter by filesize
+to-llm-view -mf 2kb
+
 # Combine options
 to-llm-view -r -o export.txt -w py,md
-to-llm-view -r -rb "^public/"
+to-llm-view -r -rb "^public/" -mf 3.1kb
 to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*"
 to-llm-view -r -rw ".*\.component\..*" -w ts,js,html
-to-llm-view -r -rw "^src/app/@standalone"
+to-llm-view -r -rw "^src/app/@standalone" -mf 1.4mb
 ```
 
 ## Command Line Options
@@ -67,6 +70,7 @@ to-llm-view -r -rw "^src/app/@standalone"
 | `-w, --whitelist` | Include only specified file extensions (comma-separated) |
 | `-rb, --regex-blacklist` | Exclude files matching regex pattern |
 | `-rw, --regex-whitelist` | Include files matching regex pattern |
+| `-mf, --max-filesize` | Maximum filesize to include (float, e.g.: 1.1mb, 2kb, 1.444gb, etc., default: 1mb) |
 
 ## Output Format
 
@@ -101,7 +105,7 @@ ToLLMView/
 
 ## Development
 
-This is version 0.1.2. The project is actively maintained and welcomes contributions!
+This is version 0.1.3. The project is actively maintained and welcomes contributions!
 
 ### Running from Source
 ```bash

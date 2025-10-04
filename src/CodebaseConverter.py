@@ -17,7 +17,12 @@ from src.utils import eprint, filler
 class CodebaseConverter:
     """Main class for converting codebase to text format."""
     
-    def __init__(self, output_file: str = "codebase_export.txt", output_dir: str = None):
+    def __init__(
+        self, 
+        output_file: str = "codebase_export.txt", 
+        output_dir: str = None, 
+        max_filesize: int = 1024 * 1024,
+    ):
         """
         Initialize converter.
         
@@ -30,6 +35,8 @@ class CodebaseConverter:
             self.output_file = output_dir + os.sep + output_file
         else:
             self.output_file = output_file
+        
+        self.max_filesize = max_filesize
         
         self.processed_files = 0
         self.skipped_files = 0
@@ -190,13 +197,15 @@ class CodebaseConverter:
             
             for encoding in encodings:
                 try:
+					# Check if file is not too large (> 1MB)
+                    filesize = os.path.getsize(file_path)
+					
+                    if filesize > self.max_filesize:
+                        self.errors.append(f"File too large (>{self.max_filesize} Bytes): {file_path}")
+                        return f"[FILE TOO LARGE - CONTENT SKIPPED]\nSize: {filesize} Bytes"
+                    
                     with open(file_path, 'r', encoding=encoding, errors='strict') as f:
                         content = f.read()
-                        
-                    # Check if file is not too large (> 1MB)
-                    if len(content) > 1024 * 1024:
-                        self.errors.append(f"File too large (>1MB): {file_path}")
-                        return f"[FILE TOO LARGE - CONTENT SKIPPED]\nSize: {len(content)} characters"
                     
                     return content
                     
@@ -324,7 +333,12 @@ STATISTICS:
         
         return "\n".join(footer_parts)
 
-    def convert(self, extensions: Optional[Set[str]] = None, bregex: Optional[re.Pattern] = None, wregex: Optional[re.Pattern] = None) -> None:
+    def convert(
+        self, 
+        extensions: Optional[Set[str]] = None, 
+        bregex: Optional[re.Pattern] = None, 
+        wregex: Optional[re.Pattern] = None
+    ) -> None:
         """
         Perform full codebase conversion.
         
