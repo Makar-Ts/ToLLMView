@@ -6,6 +6,9 @@ setup(
     name="to-llm-view",
     version=VERSION,
     packages=find_packages(),
+    install_requires=[
+        "colorama"
+    ],
     entry_points={
         "console_scripts": [
             "to-llm-view = main:main",
