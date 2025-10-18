@@ -74,3 +74,12 @@ def setup_args(parser: argparse.ArgumentParser) -> None:
 	Args:
 		parser: Argument parser to add arguments to
 	"""
+
+@abstractmethod
+def file_extention() -> str:
+	"""Get output file's extention
+
+	Returns:
+		str: output file's extention
+	"""
+	return "txt"

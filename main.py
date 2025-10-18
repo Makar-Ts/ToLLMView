@@ -39,8 +39,8 @@ def main():
     
     parser.add_argument(
         '-o', '--output',
-        default='codebase_export.txt',
-        help='Output filename (default: codebase_export.txt)'
+        default='codebase_export',
+        help='Output filename (default: codebase_export)'
     )
     
     parser.add_argument(
@@ -70,7 +70,7 @@ def main():
     
     parser.add_argument(
         '-c', '--converter',
-        default=converters_types[0],
+        default="txt.bulk" if "txt.bulk" in converters_types else converters_types[0],
         help=f"Converter to use. Currently available: {', '.join(converters_types)}"
     )
     
@@ -117,7 +117,7 @@ def main():
         eprint("   Navigate to Git repository root and run the program again")
         return 1
     
-    output_name = args.output
+    output_name = args.output + "." + converter.file_extention()
     root_path = None
     if args.root:
         p = os.getcwd()

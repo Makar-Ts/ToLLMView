@@ -53,6 +53,18 @@ class CodebaseFileGetter:
             # Split output by lines and remove empty lines
             files = [line.strip() for line in result.stdout.split('\n') if line.strip()]
             
+            
+            # Get new files
+            result = subprocess.run(
+                ["git", "ls-files", "--others", "--exclude-standard"],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            
+            files.extend([line.strip() for line in result.stdout.split('\n') if line.strip()])
+            
+            
             print(f"{Fore.LIGHTGREEN_EX}✓ Found {Fore.LIGHTBLUE_EX}{len(files)} {Fore.LIGHTGREEN_EX}files in Git repository{Style.RESET_ALL}")
             return files
             

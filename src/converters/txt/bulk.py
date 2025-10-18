@@ -34,6 +34,10 @@ def setup_args(parser: argparse.ArgumentParser) -> None:
 	)
 
 
+def file_extention() -> str:
+    return "txt"
+
+
 class BulkTextConverter(IConverter):
 	"""
 	Codebase to bulk text converter.
