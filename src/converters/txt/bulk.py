@@ -1,3 +1,10 @@
+"""
+Bulk Text Converter Module.
+
+This module provides functionality to convert a codebase into a single
+bulk text file with structured formatting for LLM consumption.
+"""
+
 import argparse
 import os
 import sys
@@ -12,20 +19,28 @@ from info import VERSION
 from src.utils import convert_filesize, eprint, filler
 
 
-def help():
-	return ""
+def help() -> str:
+	return "Converts codebase to a single bulk text file with structured formatting."
 
-def get_class():
+
+def get_class() -> type:
 	return BulkTextConverter
 
-def setup_args(parser: argparse.ArgumentParser):
+
+def setup_args(parser: argparse.ArgumentParser) -> None:
 	parser.add_argument(
 		'-mf', '--max-filesize',
 		help='Maximum filesize to include (float, e.g.: 1.1mb, 2kb, 1.444gb, etc.)'
 	)
 
+
 class BulkTextConverter(IConverter):
-	"""Codebase to bulk text"""
+	"""
+	Codebase to bulk text converter.
+	
+	Converts multiple code files into a single structured text document
+	with file trees, metadata, and formatted content.
+	"""
 
 	def __init__(
 		self, 
@@ -33,6 +48,15 @@ class BulkTextConverter(IConverter):
 		output_file: str = "codebase_export.txt", 
 		output_dir: str = None, 
 	):
+		"""
+		Initialize bulk text converter.
+		
+		Args:
+			args: Command line arguments
+			output_file: Output filename
+			output_dir: Output directory path
+		"""
+		
 		if output_dir is not None:
 			self.output_file = output_dir + os.sep + output_file
 		else:
@@ -45,7 +69,16 @@ class BulkTextConverter(IConverter):
 		self.max_filesize = convert_filesize(args.max_filesize) if args.max_filesize else 1024 ** 2
 		print(f"🔍 {Fore.GREEN}Maximum filesize set to: {Fore.LIGHTCYAN_EX}{self.max_filesize} Bytes{Style.RESET_ALL}")
 
-	def create(self, files):
+	def create(self, files: List[str]) -> None:
+		"""
+		Create bulk text output from file list.
+		
+		Args:
+			files: List of file paths to process
+			
+		Raises:
+			SystemExit: If critical error occurs during file creation
+		"""
 		try:
 			# Create file tree
 			file_tree = self.create_file_tree(files)

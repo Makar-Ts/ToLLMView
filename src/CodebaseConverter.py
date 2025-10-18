@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Codebase File Getter module.
+
+This module provides functionality to retrieve and filter files from a Git repository
+for conversion to a unified text format.
+"""
 
 import os
 import subprocess
@@ -15,14 +21,21 @@ from src.utils import eprint, filler
 
 
 class CodebaseFileGetter:
-    """Main class for converting codebase to text format."""
+    """
+    Main class for retrieving files from Git repository with filtering capabilities.
+    
+    This class handles Git operations and provides various filtering methods
+    to select specific files from the codebase.
+    """
         
     def get_git_files(self) -> List[str]:
         """
         Get file list from Git repository.
         
+        Uses 'git ls-tree' command to retrieve all files tracked by Git.
+        
         Returns:
-            List of file paths in repository
+            List[str]: List of file paths in repository
             
         Raises:
             subprocess.CalledProcessError: If git command fails
@@ -62,7 +75,7 @@ class CodebaseFileGetter:
             extensions: Set of extensions to filter by (e.g., {'.py', '.js'})
             
         Returns:
-            Filtered file list
+            List[str]: Filtered file list containing only files with specified extensions
         """
         if not extensions:
             return files
@@ -78,14 +91,20 @@ class CodebaseFileGetter:
     
     def filter_files_by_regex(self, files: List[str], bregex: Optional[re.Pattern], wregex: Optional[re.Pattern]) -> List[str]:
         """
-        Filter filenames by Regex.
+        Filter filenames by Regex patterns.
+        
+        Applies both blacklist (exclude) and whitelist (include) regex filters.
+        A file is included only if:
+        - It doesn't match blacklist regex (if provided) AND
+        - It matches whitelist regex (if provided)
         
         Args:
             files: List of file paths
-            regex: Regex pattern
+            bregex: Regex pattern for blacklist (exclude) filtering
+            wregex: Regex pattern for whitelist (include) filtering
             
         Returns:
-            Filtered file list
+            List[str]: Filtered file list
         """
         
         filtered_files = []
@@ -104,12 +123,18 @@ class CodebaseFileGetter:
         wregex: Optional[re.Pattern] = None
     ) -> List[str]:
         """
-        Get list of files to convert
+        Get list of files to convert with applied filters.
         
         Args:
             extensions: Set of extensions to filter by (e.g., {'.py', '.js'})
             bregex: Regex pattern for blacklist filtering
             wregex: Regex pattern for whitelist filtering
+            
+        Returns:
+            List[str]: Filtered list of file paths
+            
+        Raises:
+            SystemExit: If critical error occurs during processing
         """
         try:
             print(f"🚀 Starting codebase getter...")
@@ -117,7 +142,7 @@ class CodebaseFileGetter:
             # Get file list from Git
             files = self.get_git_files()
             
-            # Filter
+            # Apply filters
             if extensions:
                 files = self.filter_files_by_extensions(files, extensions)
             

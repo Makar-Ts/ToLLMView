@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+Main entry point for To LLM View application.
+
+This module handles command line arguments, initializes the appropriate converter,
+and coordinates the codebase conversion process.
+"""
+
 import importlib
 import os
 import argparse
@@ -8,14 +15,23 @@ import re
 
 from colorama import Fore, Back, Style
 
-from src.converters._IConverter import IConverter
+import src.converters._IConverter as IConverter
 from src.CodebaseConverter import CodebaseFileGetter
 from src.utils import convert_filesize, eprint, get_all_process_types, parse_extensions
 
 
 
 def main():
-    """Main program function."""
+    """
+    Main program function.
+    
+    Handles command line argument parsing, converter selection, and execution
+    of the codebase conversion process.
+    
+    Returns:
+        int: Exit code (0 for success, 1 for error)
+    """
+    
     parser = argparse.ArgumentParser(
         description="Codebase converter to unified text document for working with neural networks",
         epilog='Example: to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*" -o output.txt -mf 4kb'
@@ -71,7 +87,7 @@ def main():
         
         return 1
     
-    converter = importlib.import_module("src.converters." + pre_args.converter)
+    converter: IConverter = importlib.import_module("src.converters." + pre_args.converter)
     converter.setup_args(parser)
     
     args = parser.parse_args()
@@ -114,7 +130,7 @@ def main():
     files = getter.convert(extensions, bregex, wregex)
     
     
-    cclass: IConverter = converter.get_class()(
+    cclass: IConverter.IConverter = converter.get_class()(
         args,
         output_name,
         root_path
