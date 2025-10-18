@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from os import listdir
+import os
 import re
 from typing import Any, List, Optional, Set
 
@@ -102,3 +104,19 @@ def convert_filesize(inp: str) -> int:
 		return round(float(number[0]) * filesize_correlations[filesize[0]])
 
 	return filesize_correlations['mb']
+
+
+def get_all_process_types(path, prefix=""):
+    processes = []
+    
+    for part in listdir(path):
+        if part[0] == "_":
+            continue
+        
+        if os.path.isfile(os.path.join(path, part)):
+            if part.split(".")[-1] == "py":
+                processes.append(prefix+part.split(".")[0])
+        else:
+            processes += get_all_process_types(os.path.join(path, part), prefix+part+".")
+    
+    return processes

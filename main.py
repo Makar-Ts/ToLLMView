@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import importlib
 import os
 import argparse
 import re
 
 from colorama import Fore, Back, Style
 
-from src.CodebaseConverter import CodebaseConverter
-from src.utils import convert_filesize, eprint, parse_extensions
+from src.converters._IConverter import IConverter
+from src.CodebaseConverter import CodebaseFileGetter
+from src.utils import convert_filesize, eprint, get_all_process_types, parse_extensions
 
 
 
@@ -48,12 +50,29 @@ def main():
         help='Regex for whitelist filename filtering'
     )
     
+    converters_types = get_all_process_types(os.path.join(os.getcwd(), "src", "converters"))
     
     parser.add_argument(
-        '-mf', '--max-filesize',
-        help='Maximum filesize to include (float, e.g.: 1.1mb, 2kb, 1.444gb, etc.)'
+        '-c', '--converter',
+        default=converters_types[0],
+        help=f"Converter to use. Currently available: {', '.join(converters_types)}"
     )
     
+    pre_args = parser.parse_known_args()[0]
+    
+    if pre_args.converter not in converters_types:
+        print("Invalid process_type!")
+        print("Available process types:")
+        
+        for converter_type in converters_types:
+            module = importlib.import_module("src.converters." + converter_type)
+            print(f" - {converter_type}")
+            print(f"    {module.help()}")
+        
+        return 1
+    
+    converter = importlib.import_module("src.converters." + pre_args.converter)
+    converter.setup_args(parser)
     
     args = parser.parse_args()
     
@@ -76,9 +95,6 @@ def main():
         print(f"🔍 {Fore.GREEN}Filtering by whitelist Regex: {Fore.LIGHTCYAN_EX}{args.regex_whitelist}{Style.RESET_ALL}")
     
     
-    max_filesize = convert_filesize(args.max_filesize) if args.max_filesize else 1024 ** 2
-    print(f"🔍 {Fore.GREEN}Maximum filesize set to: {Fore.LIGHTCYAN_EX}{max_filesize} Bytes{Style.RESET_ALL}")
-    
     # Check if we're in a Git repository
     if not os.path.exists('.git'):
         eprint("❌ Error: current directory is not a Git repository")
@@ -94,8 +110,17 @@ def main():
         output_name = p[p.rfind(os.sep)+len(os.sep):]+"."+output_name
     
     # Create and run converter
-    converter = CodebaseConverter(output_name, root_path, max_filesize)
-    converter.convert(extensions, bregex, wregex)
+    getter = CodebaseFileGetter()
+    files = getter.convert(extensions, bregex, wregex)
+    
+    
+    cclass: IConverter = converter.get_class()(
+        args,
+        output_name,
+        root_path
+    )
+    cclass.create(files)
+    
     
     return 0
 
