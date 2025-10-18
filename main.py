@@ -34,7 +34,14 @@ def main():
     
     parser = argparse.ArgumentParser(
         description="Codebase converter to unified text document for working with neural networks",
-        epilog='Example: to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*" -o output.txt -mf 4kb'
+        epilog='Example: to-llm-view -r -rb "(^\.)|(^tsconfig)" -rw ".*\.component\..*" -o output.txt -mf 4kb',
+        add_help=False,
+    )
+    
+    parser.add_argument(
+        '-h', '--help',
+        action='store_true',
+        help="Show help message"
     )
     
     parser.add_argument(
@@ -76,7 +83,7 @@ def main():
     
     pre_args = parser.parse_known_args()[0]
     
-    if pre_args.converter not in converters_types:
+    if not pre_args.help and pre_args.converter not in converters_types:
         print("Invalid process_type!")
         print("Available process types:")
         
@@ -86,11 +93,17 @@ def main():
             print(f"    {module.help()}")
         
         return 1
-    
-    converter: IConverter = importlib.import_module("src.converters." + pre_args.converter)
-    converter.setup_args(parser)
+        
+    if pre_args.converter in converters_types:
+        converter: IConverter = importlib.import_module("src.converters." + pre_args.converter)
+        converter.setup_args(parser)
     
     args = parser.parse_args()
+    
+    if args.help:
+        parser.print_help()
+        
+        return 0
     
     # Parse extensions
     extensions = parse_extensions(args.whitelist) if args.whitelist else None
