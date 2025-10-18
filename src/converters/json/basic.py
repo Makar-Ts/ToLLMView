@@ -248,7 +248,7 @@ class SlimTextConverter(IConverter):
 
             output[file_path] = {
                 "path": file_path,
-                "len": file_content,
+                "len": len(file_content),
                 "content": file_content,
             }
 
