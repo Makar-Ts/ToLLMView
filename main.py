@@ -12,6 +12,7 @@ import importlib
 import os
 import argparse
 import re
+import sys
 
 from colorama import Fore, Back, Style
 
@@ -73,7 +74,7 @@ def main():
         help='Regex for whitelist filename filtering'
     )
     
-    converters_types = get_all_process_types(os.path.join(os.getcwd(), "src", "converters"))
+    converters_types = get_all_process_types(os.path.join(sys.path[6], "src", "converters"))
     
     parser.add_argument(
         '-c', '--converter',

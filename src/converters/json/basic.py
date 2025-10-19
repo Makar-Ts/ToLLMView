@@ -106,7 +106,7 @@ class SlimTextConverter(IConverter):
                     "tree": file_tree,
                     "files": files_content,
                     "footer": self.create_footer()
-                }, f)
+                }, f, indent=None)
             
             print(f"{Fore.LIGHTBLUE_EX}✅ | processed | skipped |{Style.RESET_ALL}")
             print(f"   | {Fore.GREEN}{self.processed_files: 9} | {Fore.RED}{self.skipped_files: 7} |{Style.RESET_ALL}")
