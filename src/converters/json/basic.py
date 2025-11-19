@@ -16,7 +16,7 @@ from datetime import datetime
 from colorama import Fore, Style
 from src.converters._IConverter import IConverter
 
-from info import VERSION
+from src.info import VERSION
 from src.utils import convert_filesize, eprint, filler
 
 

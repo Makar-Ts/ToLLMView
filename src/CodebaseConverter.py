@@ -16,7 +16,7 @@ from datetime import datetime
 import re
 from colorama import Fore, Back, Style
 
-from info import VERSION
+from src.info import VERSION
 from src.utils import eprint, filler
 
 

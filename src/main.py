@@ -11,6 +11,7 @@ and coordinates the codebase conversion process.
 import importlib
 import os
 import argparse
+from pathlib import Path
 import re
 import sys
 
@@ -19,8 +20,6 @@ from colorama import Fore, Back, Style
 import src.converters._IConverter as IConverter
 from src.CodebaseConverter import CodebaseFileGetter
 from src.utils import convert_filesize, eprint, get_all_process_types, parse_extensions
-
-
 
 def main():
     """
@@ -74,7 +73,7 @@ def main():
         help='Regex for whitelist filename filtering'
     )
     
-    converters_types = get_all_process_types(os.path.join(sys.path[6], "src", "converters"))
+    converters_types = get_all_process_types(os.path.join(Path(__file__).parent, "converters"))
     
     parser.add_argument(
         '-c', '--converter',

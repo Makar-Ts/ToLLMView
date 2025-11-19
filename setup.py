@@ -6,7 +6,7 @@ This module defines the package setup configuration for distribution.
 
 from setuptools import setup, find_packages
 
-from info import VERSION
+from src.info import VERSION
 
 setup(
     name="to-llm-view",
@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "to-llm-view = main:main",
+            "to-llm-view = src.main:main",
         ],
     },
 )
